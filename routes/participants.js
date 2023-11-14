@@ -149,24 +149,86 @@ router.delete('/:email', async (req, res) => {
   // GET different Participants DETAILS
 
   //GETs personal details from active participants
-  router.get('/details', (req, res) => {
+  router.get('/details', async (req, res) => {
+    try {
+      const activeParticipants = await participants.filter({ active: true });
+      res.status(200).json({ status: 200, data: activeParticipants });
+    } catch (error) {
+      res.status(500).json({ status: 500, error: error.message });
+    }
+  });
   
+  router.get('/details/deleted', async (req, res) => {
+    try {
+      const inactiveParticipants = await participants.filter({ active: false });
+      res.status(200).json({ status: 200, data: inactiveParticipants });
+    } catch (error) {
+      res.status(500).json({ status: 500, error: error.message });
+    }
   });
 
-  router.get('/details/deleted', (req, res) => {
-  return 	
+  router.get('/details/:email', async (req, res) => {
+    try {
+      const activeParticipant = await participants.item(req.params.email).get();
+  
+      if (!activeParticipant) {
+        return res.status(404).json({ status: 404, error: "Participant not found." });
+      }
+  
+      if (activeParticipant.props.active === false) {
+        return res.status(400).json({ status: 400, error: "Participant is inactive." });
+      }
+  
+      res.status(200).json({ status: 200, data: activeParticipant });
+    } catch (error) {
+      res.status(500).json({ status: 500, error: error.message });
+    }
   });
 
-  router.get(' /details/:email', (req, res) => {
-  return 	
+  router.get('/work/:email', async(req, res) => {
+    try {
+      const activeParticipant = await participants.item(req.params.email).get();
+      const workInfo = await participants.item(req.params.email).fragment('work').get();
+  
+      if (!activeParticipant) {
+        return res.status(404).json({ status: 404, error: "Participant not found." });
+      }
+  
+      if (activeParticipant.props.active === false) {
+        return res.status(400).json({ status: 400, error: "Participant is inactive." });
+      }
+
+      if(!workInfo){
+        return res.status(404).json({ status: 404, error: "Participant does not have work information." });
+      }
+  
+      res.status(200).json({ status: 200, data: workInfo });
+    } catch (error) {
+      res.status(500).json({ status: 500, error: error.message });
+    }
   });
 
-  router.get('/work/:email', (req, res) => {
-  return 	
-  });
+  router.get('/home/:email', async(req, res) => {
+    try {
+      const activeParticipant = await participants.item(req.params.email).get();
+      const homeInfo = await participants.item(req.params.email).fragment('home').get();
+  
+      if (!activeParticipant) {
+        return res.status(404).json({ status: 404, error: "Participant not found." });
+      }
+  
+      if (activeParticipant.props.active === false) {
+        return res.status(400).json({ status: 400, error: "Participant is inactive." });
+      }
 
-  router.get('/home/:email', (req, res) => {
-  return 	
+      if(!homeInfo){
+        return res.status(404).json({ status: 404, error: "Participant does not have work information." });
+      }
+  
+      res.status(200).json({ status: 200, data: homeInfo });
+    } catch (error) {
+      res.status(500).json({ status: 500, error: error.message });
+    } 	
   });
   
   module.exports = router;
