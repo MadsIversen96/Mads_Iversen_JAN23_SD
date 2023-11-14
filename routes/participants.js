@@ -30,6 +30,14 @@ router.get('/', async function (req, res, next) {
 
 router.post('/add', async (req, res) => {
   try {
+    const validProperties = ['email', 'firstname', 'lastname', 'dob', 'companyname', 'salary', 'currency', 'country', 'city'];
+
+    // Check if all provided properties are valid
+    const invalidProperties = Object.keys(req.body).filter(property => !validProperties.includes(property));
+    if (invalidProperties.length > 0) {
+      return res.status(400).json({ status: 400, error: `Invalid properties: ${invalidProperties.join(', ')}`, message: "Correct properties: email, firstname, lastname, dob, companyname, salary, currency, country, city" });
+    }
+
     const { email, firstname, lastname, dob, companyname, salary, currency, country, city } = req.body;
 
     // Validates email format
